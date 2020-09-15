@@ -214,3 +214,49 @@ function showGameOver() {
     context.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2);
 }
 
+// следим за нажатиями на клавиши
+document.addEventListener('keydown', function (e) {
+    // если игра закончилась — сразу выходим
+    if (gameOver) return;
+
+    // стрелки влево и вправо
+    if (e.which === 37 || e.which === 39) {
+        const col = e.which === 37
+            // если влево, то уменьшаем индекс в столбце, если вправо — увеличиваем
+            ? tetromino.col - 1
+            : tetromino.col + 1;
+
+        // если так ходить можно, то запоминаем текущее положение 
+        if (isValidMove(tetromino.matrix, tetromino.row, col)) {
+            tetromino.col = col;
+        }
+    }
+
+    // стрелка вверх — поворот
+    if (e.which === 38) {
+        // поворачиваем фигуру на 90 градусов
+        const matrix = rotate(tetromino.matrix);
+        // если так ходить можно — запоминаем
+        if (isValidMove(matrix, tetromino.row, tetromino.col)) {
+            tetromino.matrix = matrix;
+        }
+    }
+
+    // стрелка вниз — ускорить падение
+    if (e.which === 40) {
+        // смещаем фигуру на строку вниз
+        const row = tetromino.row + 1;
+        // если опускаться больше некуда — запоминаем новое положение
+        if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
+            tetromino.row = row - 1;
+            // ставим на место и смотрим на заполненные ряды
+            placeTetromino();
+            return;
+        }
+        // запоминаем строку, куда стала фигура
+        tetromino.row = row;
+    }
+});
+
+
+
