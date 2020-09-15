@@ -134,3 +134,83 @@ function rotate(matrix) {
     // на входе матрица, и на выходе тоже отдаём матрицу
     return result;
 }
+
+// проверяем после появления или вращения, может ли матрица (фигура) быть в этом месте поля или она вылезет за его границы
+function isValidMove(matrix, cellRow, cellCol) {
+    // проверяем все строки и столбцы
+    for (let row = 0; row < matrix.length; row++) {
+        for (let col = 0; col < matrix[row].length; col++) {
+            if (matrix[row][col] && (
+                // если выходит за границы поля…
+                cellCol + col < 0 ||
+                cellCol + col >= playfield[0].length ||
+                cellRow + row >= playfield.length ||
+                // …или пересекается с другими фигурами
+                playfield[cellRow + row][cellCol + col])
+            ) {
+                // то возвращаем, что нет, так не пойдёт
+                return false;
+            }
+        }
+    }
+    // а если мы дошли до этого момента и не закончили раньше — то всё в порядке
+    return true;
+}
+
+// когда фигура окончательна встала на своё место
+function placeTetromino() {
+    // обрабатываем все строки и столбцы в игровом поле
+    for (let row = 0; row < tetromino.matrix.length; row++) {
+        for (let col = 0; col < tetromino.matrix[row].length; col++) {
+            if (tetromino.matrix[row][col]) {
+
+                // если край фигуры после установки вылезает за границы поля, то игра закончилась
+                if (tetromino.row + row < 0) {
+                    return showGameOver();
+                }
+                // если всё в порядке, то записываем в массив игрового поля нашу фигуру
+                playfield[tetromino.row + row][tetromino.col + col] = tetromino.name;
+            }
+        }
+    }
+
+    // проверяем, чтобы заполненные ряды очистились снизу вверх
+    for (let row = playfield.length - 1; row >= 0;) {
+        // если ряд заполнен
+        if (playfield[row].every(cell => !!cell)) {
+
+            // очищаем его и опускаем всё вниз на одну клетку
+            for (let r = row; r >= 0; r--) {
+                for (let c = 0; c < playfield[r].length; c++) {
+                    playfield[r][c] = playfield[r - 1][c];
+                }
+            }
+        }
+        else {
+            // переходим к следующему ряду
+            row--;
+        }
+    }
+    // получаем следующую фигуру
+    tetromino = getNextTetromino();
+}
+
+// показываем надпись Game Over
+function showGameOver() {
+    // прекращаем всю анимацию игры
+    cancelAnimationFrame(rAF);
+    // ставим флаг окончания
+    gameOver = true;
+    // рисуем чёрный прямоугольник посередине поля
+    context.fillStyle = 'black';
+    context.globalAlpha = 0.75;
+    context.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
+    // пишем надпись белым моноширинным шрифтом по центру
+    context.globalAlpha = 1;
+    context.fillStyle = 'white';
+    context.font = '36px monospace';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2);
+}
+
