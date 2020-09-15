@@ -124,3 +124,13 @@ function getNextTetromino() {
         col: col         // текущий столбец
     };
 }
+
+// поворачиваем матрицу на 90 градусов
+function rotate(matrix) {
+    const N = matrix.length - 1;
+    const result = matrix.map((row, i) =>
+        row.map((val, j) => matrix[N - j][i])
+    );
+    // на входе матрица, и на выходе тоже отдаём матрицу
+    return result;
+}
